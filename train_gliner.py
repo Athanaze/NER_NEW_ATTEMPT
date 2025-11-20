@@ -16,7 +16,6 @@ from datasets import load_dataset
 from gliner import GLiNER, GLiNERConfig
 from gliner.training import Trainer, TrainingArguments
 from gliner.data_processing.collator import DataCollatorWithPadding, DataCollator
-from gliner.modules.run_evaluation import get_for_all_path
 import wandb
 
 
@@ -212,6 +211,7 @@ def train_model(
     gradient_accumulation_steps: int = 4,
     max_grad_norm: float = 1.0,
     use_wandb: bool = True,
+    deepspeed: str = None,
     seed: int = 42,
 ):
     """
@@ -307,6 +307,8 @@ def train_model(
         load_best_model_at_end=True,
         metric_for_best_model="eval_loss",
         greater_is_better=False,
+        fp16=True,  # Enable mixed precision training
+        deepspeed=deepspeed,  # DeepSpeed config for model sharding
     )
 
     # Data collator
@@ -316,17 +318,6 @@ def train_model(
         prepare_labels=True,
     )
 
-    # Custom callback for wandb logging
-    class WandbCallback:
-        def __init__(self, use_wandb):
-            self.use_wandb = use_wandb
-
-        def on_log(self, args, state, control, logs=None, **kwargs):
-            if self.use_wandb and logs:
-                wandb.log(logs, step=state.global_step)
-
-    callbacks = [WandbCallback(use_wandb)] if use_wandb else []
-
     # Initialize trainer
     trainer = Trainer(
         model=model,
@@ -335,7 +326,6 @@ def train_model(
         eval_dataset=val_data,
         tokenizer=model.data_processor.transformer_tokenizer,
         data_collator=data_collator,
-        callbacks=callbacks,
     )
 
     # Train
@@ -388,6 +378,8 @@ def main():
                         help="Max gradient norm for clipping")
     parser.add_argument("--no_wandb", action="store_true",
                         help="Disable Weights & Biases logging")
+    parser.add_argument("--deepspeed", type=str, default=None,
+                        help="Path to DeepSpeed config file for model sharding")
     parser.add_argument("--seed", type=int, default=42,
                         help="Random seed")
 
@@ -408,6 +400,7 @@ def main():
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         max_grad_norm=args.max_grad_norm,
         use_wandb=not args.no_wandb,
+        deepspeed=args.deepspeed,
         seed=args.seed,
     )
 
