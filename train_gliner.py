@@ -16,7 +16,6 @@ from datasets import load_dataset
 from gliner import GLiNER, GLiNERConfig
 from gliner.training import Trainer, TrainingArguments
 from gliner.data_processing.collator import DataCollatorWithPadding, DataCollator
-from gliner.modules.run_evaluation import get_for_all_path
 import wandb
 
 
