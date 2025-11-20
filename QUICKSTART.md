@@ -42,9 +42,9 @@ Converting to GLiNER format...
 Converted 19400 examples
 Train set: 17460 examples
 Validation set: 1940 examples
-Loading model: knowledgator/gliner-x-large
+Loading model: knowledgator/gliner-x-small
 Device: cuda
-Number of GPUs: 2
+Number of GPUs: 4
 Starting training...
 ```
 

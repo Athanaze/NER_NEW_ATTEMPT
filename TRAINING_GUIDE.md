@@ -1,12 +1,12 @@
 # GLiNER Legal NER Fine-tuning Guide
 
-This guide explains how to finetune the `knowledgator/gliner-x-large` model on the legal NER dataset for detecting **doctrine**, **jurisprudence**, and **articles de loi** entities.
+This guide explains how to finetune the `knowledgator/gliner-x-small` model on the legal NER dataset for detecting **doctrine**, **jurisprudence**, and **articles de loi** entities.
 
 ## Requirements
 
 ### Hardware
-- **Recommended**: 2x RTX 4090 GPUs (24GB VRAM each)
-- **Minimum**: 1x GPU with at least 16GB VRAM
+- **Recommended**: 4x RTX 4090 GPUs (24GB VRAM each)
+- **Minimum**: 1x GPU with at least 8GB VRAM
 
 ### Software
 - Python 3.8+
@@ -55,17 +55,17 @@ python train_gliner.py
 ```bash
 python train_gliner.py \
     --output_dir ./gliner-legal-finetuned \
-    --model_name knowledgator/gliner-x-large \
+    --model_name knowledgator/gliner-x-small \
     --num_epochs 10 \
-    --train_batch_size 4 \
-    --eval_batch_size 8 \
+    --train_batch_size 8 \
+    --eval_batch_size 16 \
     --learning_rate 5e-6 \
     --weight_decay 0.01 \
     --warmup_ratio 0.1 \
     --eval_steps 500 \
     --save_steps 500 \
     --logging_steps 100 \
-    --gradient_accumulation_steps 4 \
+    --gradient_accumulation_steps 2 \
     --seed 42
 ```
 
@@ -79,22 +79,23 @@ python train_gliner.py --no_wandb
 
 ### Multi-GPU Training
 
-The script automatically detects and uses all available GPUs. With 2x RTX 4090:
+The script automatically detects and uses all available GPUs with PyTorch DataParallel. With 4x RTX 4090:
 - Effective batch size = `train_batch_size` × `num_gpus` × `gradient_accumulation_steps`
-- Example: 4 × 2 × 4 = 32 effective batch size
+- Example: 8 × 4 × 2 = 64 effective batch size
 
 ## Key Parameters
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `--output_dir` | `./gliner-legal-finetuned` | Directory to save the model |
+| `--model_name` | `knowledgator/gliner-x-small` | Pre-trained model to finetune |
 | `--num_epochs` | 10 | Number of training epochs |
-| `--train_batch_size` | 4 | Batch size per GPU for training |
-| `--eval_batch_size` | 8 | Batch size per GPU for evaluation |
+| `--train_batch_size` | 8 | Batch size per GPU for training |
+| `--eval_batch_size` | 16 | Batch size per GPU for evaluation |
 | `--learning_rate` | 5e-6 | Learning rate for the encoder |
 | `--weight_decay` | 0.01 | Weight decay for regularization |
 | `--warmup_ratio` | 0.1 | Proportion of training for warmup |
-| `--gradient_accumulation_steps` | 4 | Steps to accumulate gradients |
+| `--gradient_accumulation_steps` | 2 | Steps to accumulate gradients |
 | `--eval_steps` | 500 | Evaluate every N steps |
 | `--save_steps` | 500 | Save checkpoint every N steps |
 
@@ -185,10 +186,11 @@ If the model doesn't perform well:
 
 ## Expected Training Time
 
-On 2x RTX 4090:
+On 4x RTX 4090:
 - **Dataset size**: ~19.4k examples
+- **Model**: gliner-x-small (smaller, faster than x-large)
 - **Epochs**: 10
-- **Estimated time**: 2-4 hours (depends on sequence lengths)
+- **Estimated time**: 1-2 hours (depends on sequence lengths)
 
 ## Performance Tips
 

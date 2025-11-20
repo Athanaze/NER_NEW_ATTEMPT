@@ -198,17 +198,17 @@ def prepare_datasets(train_size: float = 0.9, seed: int = 42):
 
 def train_model(
     output_dir: str = "./gliner-legal-finetuned",
-    model_name: str = "knowledgator/gliner-x-large",
+    model_name: str = "knowledgator/gliner-x-small",
     num_train_epochs: int = 10,
-    train_batch_size: int = 4,
-    eval_batch_size: int = 8,
+    train_batch_size: int = 8,
+    eval_batch_size: int = 16,
     learning_rate: float = 5e-6,
     weight_decay: float = 0.01,
     warmup_ratio: float = 0.1,
     eval_steps: int = 500,
     save_steps: int = 500,
     logging_steps: int = 100,
-    gradient_accumulation_steps: int = 4,
+    gradient_accumulation_steps: int = 2,
     max_grad_norm: float = 1.0,
     use_wandb: bool = True,
     deepspeed: str = None,
@@ -352,13 +352,13 @@ def main():
     parser = argparse.ArgumentParser(description="Finetune GLiNER for legal NER")
     parser.add_argument("--output_dir", type=str, default="./gliner-legal-finetuned",
                         help="Directory to save the finetuned model")
-    parser.add_argument("--model_name", type=str, default="knowledgator/gliner-x-large",
+    parser.add_argument("--model_name", type=str, default="knowledgator/gliner-x-small",
                         help="Pre-trained model to finetune")
     parser.add_argument("--num_epochs", type=int, default=10,
                         help="Number of training epochs")
-    parser.add_argument("--train_batch_size", type=int, default=4,
+    parser.add_argument("--train_batch_size", type=int, default=8,
                         help="Training batch size per GPU")
-    parser.add_argument("--eval_batch_size", type=int, default=8,
+    parser.add_argument("--eval_batch_size", type=int, default=16,
                         help="Evaluation batch size per GPU")
     parser.add_argument("--learning_rate", type=float, default=5e-6,
                         help="Learning rate")
@@ -372,7 +372,7 @@ def main():
                         help="Save checkpoint every N steps")
     parser.add_argument("--logging_steps", type=int, default=100,
                         help="Log every N steps")
-    parser.add_argument("--gradient_accumulation_steps", type=int, default=4,
+    parser.add_argument("--gradient_accumulation_steps", type=int, default=2,
                         help="Gradient accumulation steps")
     parser.add_argument("--max_grad_norm", type=float, default=1.0,
                         help="Max gradient norm for clipping")
