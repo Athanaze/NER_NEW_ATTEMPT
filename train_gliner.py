@@ -315,17 +315,6 @@ def train_model(
         prepare_labels=True,
     )
 
-    # Custom callback for wandb logging
-    class WandbCallback:
-        def __init__(self, use_wandb):
-            self.use_wandb = use_wandb
-
-        def on_log(self, args, state, control, logs=None, **kwargs):
-            if self.use_wandb and logs:
-                wandb.log(logs, step=state.global_step)
-
-    callbacks = [WandbCallback(use_wandb)] if use_wandb else []
-
     # Initialize trainer
     trainer = Trainer(
         model=model,
@@ -334,7 +323,6 @@ def train_model(
         eval_dataset=val_data,
         tokenizer=model.data_processor.transformer_tokenizer,
         data_collator=data_collator,
-        callbacks=callbacks,
     )
 
     # Train
