@@ -148,6 +148,11 @@ def convert_to_gliner_format(examples):
     return gliner_data
 
 
+def sort_by_length(data):
+    """Sort data by sequence length for consistent batch sizes."""
+    return sorted(data, key=lambda x: len(x['tokenized_text']))
+
+
 def prepare_datasets():
     """Load and prepare datasets."""
     print("Loading dataset from HuggingFace...")
@@ -178,6 +183,15 @@ def prepare_datasets():
     split_idx = int(len(gliner_data) * TRAIN_SPLIT)
     train_data = gliner_data[:split_idx]
     val_data = gliner_data[split_idx:]
+
+    # Sort by length for consistent batch sizes (prevents OOM)
+    print("Sorting by sequence length for consistent batches...")
+    train_data = sort_by_length(train_data)
+    val_data = sort_by_length(val_data)
+
+    # Show length distribution
+    train_lengths = [len(x['tokenized_text']) for x in train_data]
+    print(f"Train lengths: min={min(train_lengths)}, max={max(train_lengths)}, avg={sum(train_lengths)//len(train_lengths)}")
 
     print(f"Train set: {len(train_data)} examples")
     print(f"Validation set: {len(val_data)} examples")
